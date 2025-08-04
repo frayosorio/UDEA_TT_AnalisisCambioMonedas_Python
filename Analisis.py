@@ -1,6 +1,7 @@
 import json
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 with open("datos/Cambios Monedas Agrupado.json","r") as archivo:
     datos = json.load(archivo)
@@ -36,8 +37,36 @@ for moneda in monedas:
 
 plt.figure(figsize=(14,7))
 for moneda in monedas:
-    plt.plot(dfMonedas.index, dfMonedas[moneda], label=moneda)
+    if moneda=='COP':
+        plt.plot(dfMonedas.index, dfMonedas[moneda]/1000, label=f"{moneda}/1000")
+    else:
+        plt.plot(dfMonedas.index, dfMonedas[moneda], label=moneda)
 plt.xlabel("Fecha")
 plt.ylabel("Cambio")
+plt.legend()
+plt.show()
+
+#Correlacion
+matrizCorrelacion= dfMonedas.corr(method="pearson")
+plt.figure(figsize=(10, 8))
+sns.heatmap(
+    matrizCorrelacion,
+    annot=True,
+    cmap="coolwarm",
+    cbar_kws={"label": "Coeficiente de Correlación"}
+)
+plt.show()
+
+monedaAnalisis="COP"
+dfMonedas[f"{monedaAnalisis}_MV"] = dfMonedas[monedaAnalisis].rolling(window=100).mean()
+print(dfMonedas.head())
+
+plt.figure(figsize=(12,6))
+plt.plot(dfMonedas.index, dfMonedas[monedaAnalisis], label=monedaAnalisis)
+plt.plot(dfMonedas.index, \
+         dfMonedas[f"{monedaAnalisis}_MV"], \
+         label=f"{monedaAnalisis} con media movil", \
+         linestyle="--"
+)
 plt.legend()
 plt.show()
